@@ -16,7 +16,7 @@ class Tasks {
     
     return [
       `=> You have ${tasksDueToday.length} tasks due today:`,
-      tasksDueToday.map(task => ` * ${task.name}`).join('\n'),
+      tasksDueToday.map((task,idx) => ` * ${task.name}`).join('\n'),
       `\n=> You have ${otherTasksDueInAWeek.length} other tasks due in a week:`,
       otherTasksDueInAWeek.map(task => ` * ${task.name}`).join('\n'),
     ].join('\n');

@@ -6,10 +6,11 @@ const User = require('./user.js');
 const Tasks = require('./tasks.js');
 
 const token = process.env.BOT_TOKEN
-console.log({token})
 
 // Create a bot that uses 'polling' to fetch new updates
 const bot = new TelegramBot(token, {polling: true});
+
+bot.on("polling_error", (msg) => console.log(msg));
 
 bot.onText(/\/start/, (msg, _match) => {
   // 'msg' is the received Message from Telegram
@@ -19,29 +20,28 @@ bot.onText(/\/start/, (msg, _match) => {
   const chatId = msg.chat.id;
 
   const user = new User(msg.from);
+  const tasks = new Tasks(user.fetchTasks());
   
   bot.sendMessage(chatId, `
 Hi ${user.name}!
-/see_tasks - see the tasks you have to do
-/create_task - create a new task`);
-});
+/do [task name] - create a new task
 
-bot.onText(/\/see_tasks/, (msg, _match) => {
-  const chatId = msg.chat.id;
-  const user = new User(msg.from);
-  const tasks = new Tasks(user.fetchTasks());
-  
-  console.log(tasks.buildTasksOverviewString());
-
-  bot.sendMessage(chatId, `
 ${tasks.buildTasksOverviewString()}`);
 });
 
-// Listen for any kind of message. There are different kinds of
-// messages.
+bot.onText(/\/do/, (msg, match) => {
+  const chatId = msg.chat.id;
+  const resp = match[1]; // the captured "whatever"
+
+  bot.sendMessage(chatId, resp);
+});
+
 bot.on('message', (msg) => {
+  const reg = /^\/do (.*)/gm;
+  const command = msg.match(reg)[1];
   const chatId = msg.chat.id;
 
-  // send a message to the chat acknowledging receipt of their message
-  bot.sendMessage(chatId, 'Received your message');
+  bot.sendMessage(chatId, `Created a new task named "${command}"`);
 });
+
+

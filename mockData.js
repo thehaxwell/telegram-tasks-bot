@@ -8,17 +8,13 @@ module.exports = {
       {
         name: 'do something tomorrow',
         dueDate: getTodaysDatePlusDays(1),
+        isDone: false,
       },
       {
         name: 'Finish this task too',
         dueDate: getTodaysDatePlusDays(2),
+        isDone: false,
       },
     ],
-    '2': [
-      {
-        name: 'Finish this task',
-        dueDate: new Date(Date.now() + 1000 * 60 * 60 * 24 * 1),
-      }
-    ]
   }
 };
