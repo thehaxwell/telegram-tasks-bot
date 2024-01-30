@@ -12,6 +12,8 @@ const bot = new TelegramBot(token, {polling: true});
 
 bot.on("polling_error", (msg) => console.log(msg));
 
+const NEW_TASK_COMMAND = "/do [task name] - create a new task";
+
 bot.onText(/\/start/, (msg, _match) => {
   // 'msg' is the received Message from Telegram
   // 'match' is the result of executing the regexp above on the text content
@@ -24,24 +26,28 @@ bot.onText(/\/start/, (msg, _match) => {
   
   bot.sendMessage(chatId, `
 Hi ${user.name}!
-/do [task name] - create a new task
+${NEW_TASK_COMMAND}
 
 ${tasks.buildTasksOverviewString()}`);
 });
 
-bot.onText(/\/do/, (msg, match) => {
-  const chatId = msg.chat.id;
-  const resp = match[1]; // the captured "whatever"
-
-  bot.sendMessage(chatId, resp);
-});
-
 bot.on('message', (msg) => {
   const reg = /^\/do (.*)/gm;
-  const command = msg.match(reg)[1];
+
+  const found = [...msg.text.matchAll(reg)];
+  if(!found) return;
+  const command = found[0][1];
   const chatId = msg.chat.id;
 
-  bot.sendMessage(chatId, `Created a new task named "${command}"`);
+  bot.sendMessage(chatId, `
+Created a new task named "${command}"
+
+This task is due today. /change_due_date to change the due date
+/delete - delete this task
+/done - mark this task as done
+
+${NEW_TASK_COMMAND}
+`);
 });
 
 
