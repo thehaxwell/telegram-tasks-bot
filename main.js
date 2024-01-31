@@ -28,15 +28,15 @@ bot.onText(/\/start/, (msg, _match) => {
 Hi ${user.name}!
 ${NEW_TASK_COMMAND}
 
-${tasks.buildTasksOverviewString()}`);
+${tasks.buildTasksOverviewString()}`, {parse_mode: 'HTML'});
 });
 
 bot.on('message', (msg) => {
   const reg = /^\/do (.*)/gm;
 
-  const found = [...msg.text.matchAll(reg)];
+  const found = [...msg.text.matchAll(reg)][0];
   if(!found) return;
-  const command = found[0][1];
+  const command = found[1];
   const chatId = msg.chat.id;
 
   bot.sendMessage(chatId, `
@@ -45,6 +45,30 @@ Created a new task named "${command}"
 This task is due today. /change_due_date to change the due date
 /delete - delete this task
 /done - mark this task as done
+
+/start - see your tasks
+
+${NEW_TASK_COMMAND}
+`);
+});
+
+
+bot.on('message', (msg) => {
+  const reg = /^\/edit_(.*)/gm;
+
+  const found = [...msg.text.matchAll(reg)][0];
+  if(!found) return;
+  const command = found[1];
+  const chatId = msg.chat.id;
+
+  bot.sendMessage(chatId, `
+Edit the task "${command}"
+
+This task is due today. /change_due_date to change the due date
+/delete - delete this task
+/done - mark this task as done
+
+/start - see your tasks
 
 ${NEW_TASK_COMMAND}
 `);

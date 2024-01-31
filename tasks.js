@@ -5,20 +5,29 @@ function dateIsWithinNumDays(date, numDays) {
   return diffDays <= numDays;
 }
 
+function displayTask(task){
+  const icon = task.hasOwnProperty('dateDone') ? '👍🏼' :'👉🏼';
+  const name = task.hasOwnProperty('dateDone') ? `<s>${task.name}</s>` : task.name;
+return ` ${icon} ${name} /edit_${task.id}`;
+}
+
 class Tasks {
   constructor(tasksSrc){
     this.src = tasksSrc;
   }
 
   buildTasksOverviewString(){
-    const tasksDueToday = this.src.filter(task => dateIsWithinNumDays(task.dueDate, 1));
-    const otherTasksDueInAWeek = this.src.filter(task => !dateIsWithinNumDays(task.dueDate, 1) && dateIsWithinNumDays(task.dueDate, 7));
+    const tasksDoneToday = this.src.filter(task => task.hasOwnProperty('dateDone') && dateIsWithinNumDays(task.dateDone, 1));
+    const tasksDueToday = this.src.filter(task => !task.hasOwnProperty('dateDone') && dateIsWithinNumDays(task.dueDate, 1));
+    const otherTasksDueInAWeek = this.src.filter(task => !task.hasOwnProperty('dateDone') && !dateIsWithinNumDays(task.dueDate, 1) && dateIsWithinNumDays(task.dueDate, 7));
     
     return [
-      `=> You have ${tasksDueToday.length} tasks due today:`,
-      tasksDueToday.map((task,idx) => ` * ${task.name}`).join('\n'),
-      `\n=> You have ${otherTasksDueInAWeek.length} other tasks due in a week:`,
-      otherTasksDueInAWeek.map(task => ` * ${task.name}`).join('\n'),
+      `Tasks you've done today🎉`,
+      tasksDoneToday.map(displayTask).join('\n'),
+      `\nTasks due today❗`,
+      tasksDueToday.map(displayTask).join('\n'),
+      `\nTasks due this week⏳`,
+      otherTasksDueInAWeek.map(displayTask).join('\n'),
     ].join('\n');
   }
 }

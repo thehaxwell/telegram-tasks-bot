@@ -6,14 +6,20 @@ module.exports = {
   tasks: {
     '6883659363': [
       {
-        name: 'do something tomorrow',
+        name: 'Make a Telegram bot',
         dueDate: getTodaysDatePlusDays(1),
-        isDone: false,
+        dateDone: getTodaysDatePlusDays(0),
+        id: 'fj2038wfj',
+      },
+      {
+        name: 'eat cheese',
+        dueDate: getTodaysDatePlusDays(1),
+        id: 'df83c03jc',
       },
       {
         name: 'Finish this task too',
         dueDate: getTodaysDatePlusDays(2),
-        isDone: false,
+        id: 'jf1j93cJK',
       },
     ],
   }
