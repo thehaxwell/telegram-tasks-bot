@@ -3,6 +3,11 @@ function getTodaysDatePlusDays(days){
 }
 
 module.exports = {
+  users: {
+    '6883659363': {
+      activeTask: null,
+    },
+  },
   tasks: {
     '6883659363': [
       {
@@ -15,6 +20,10 @@ module.exports = {
         name: 'eat cheese',
         dueDate: getTodaysDatePlusDays(1),
         id: 'df83c03jc',
+      },
+      {
+        name: 'clean my room whenever',
+        id: 'fj3209finby',
       },
       {
         name: 'Finish this task too',

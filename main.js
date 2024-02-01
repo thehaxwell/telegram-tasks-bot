@@ -13,6 +13,15 @@ const bot = new TelegramBot(token, {polling: true});
 bot.on("polling_error", (msg) => console.log(msg));
 
 const NEW_TASK_COMMAND = "/do [task name] - create a new task";
+const SEE_TASKS_COMMAND = "/start - see your tasks";
+const TASK_DONE_INDICATOR_EMOJI = '👍🏼';
+const TASK_UNDONE_INDICATOR_EMOJI = '👉🏼';
+
+const showStartPage = (firstLine,tasksInstance) => `
+${firstLine}
+${NEW_TASK_COMMAND}
+${SEE_TASKS_COMMAND}
+${tasksInstance.buildTasksOverviewString()}`;
 
 bot.onText(/\/start/, (msg, _match) => {
   // 'msg' is the received Message from Telegram
@@ -23,13 +32,20 @@ bot.onText(/\/start/, (msg, _match) => {
 
   const user = new User(msg.from);
   const tasks = new Tasks(user.fetchTasks());
-  
-  bot.sendMessage(chatId, `
-Hi ${user.name}!
-${NEW_TASK_COMMAND}
 
-${tasks.buildTasksOverviewString()}`, {parse_mode: 'HTML'});
+  bot.sendMessage(chatId, showStartPage(`Hi ${user.name}!`,tasks), {parse_mode: 'HTML'});
+
 });
+
+function taskOptionsString(task){
+  return [
+    `This task is due today. /change_due_date to change the due date`,
+    '/delete - delete this task',
+    `/${task.hasOwnProperty('dateDone')?'undone':'done'} - mark this task as ${task.hasOwnProperty('dateDone')
+        ? TASK_UNDONE_INDICATOR_EMOJI+'undone/incomplete'
+        :TASK_DONE_INDICATOR_EMOJI+'done/completed'}`,
+  ].join('\n');
+}
 
 bot.on('message', (msg) => {
   const reg = /^\/do (.*)/gm;
@@ -39,12 +55,13 @@ bot.on('message', (msg) => {
   const command = found[1];
   const chatId = msg.chat.id;
 
+  const user = new User(msg.from);
+  user.addNewTask(command);
+
   bot.sendMessage(chatId, `
 Created a new task named "${command}"
 
-This task is due today. /change_due_date to change the due date
-/delete - delete this task
-/done - mark this task as done
+${taskOptionsString(user.fetchActiveTask())}
 
 /start - see your tasks
 
@@ -58,20 +75,53 @@ bot.on('message', (msg) => {
 
   const found = [...msg.text.matchAll(reg)][0];
   if(!found) return;
-  const command = found[1];
+  const taskId = found[1];
   const chatId = msg.chat.id;
 
+  const user = new User(msg.from);
+  user.activateTask(taskId);
+
+  const activeTask = user.fetchActiveTask();
+
   bot.sendMessage(chatId, `
-Edit the task "${command}"
+Edit the task "${activeTask.name}"
 
-This task is due today. /change_due_date to change the due date
-/delete - delete this task
-/done - mark this task as done
+${taskOptionsString(activeTask)}
 
-/start - see your tasks
+${SEE_TASKS_COMMAND}
 
 ${NEW_TASK_COMMAND}
 `);
 });
 
+
+bot.onText(/\/delete/, (msg, _match) => {
+  const chatId = msg.chat.id;
+
+  const user = new User(msg.from);
+  user.deleteActiveTask();
+  const tasks = new Tasks(user.fetchTasks());
+  
+  bot.sendMessage(chatId, showStartPage('You deleted the task',tasks), {parse_mode: 'HTML'});
+});
+
+bot.onText(/\/done/, (msg, _match) => {
+  const chatId = msg.chat.id;
+
+  const user = new User(msg.from);
+  user.markActiveTaskAsDone();
+  const tasks = new Tasks(user.fetchTasks());
+  
+  bot.sendMessage(chatId, showStartPage('You marked the task as done',tasks), {parse_mode: 'HTML'});
+});
+
+bot.onText(/\/undone/, (msg, _match) => {
+  const chatId = msg.chat.id;
+
+  const user = new User(msg.from);
+  user.markActiveTaskAsUndone();
+  const tasks = new Tasks(user.fetchTasks());
+  
+  bot.sendMessage(chatId, showStartPage('You marked the task as undone',tasks), {parse_mode: 'HTML'});
+});
 

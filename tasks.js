@@ -18,17 +18,28 @@ class Tasks {
 
   buildTasksOverviewString(){
     const tasksDoneToday = this.src.filter(task => task.hasOwnProperty('dateDone') && dateIsWithinNumDays(task.dateDone, 1));
-    const tasksDueToday = this.src.filter(task => !task.hasOwnProperty('dateDone') && dateIsWithinNumDays(task.dueDate, 1));
-    const otherTasksDueInAWeek = this.src.filter(task => !task.hasOwnProperty('dateDone') && !dateIsWithinNumDays(task.dueDate, 1) && dateIsWithinNumDays(task.dueDate, 7));
+    const tasksDueToday = this.src.filter(task => !task.hasOwnProperty('dateDone') && task.hasOwnProperty('dueDate') && dateIsWithinNumDays(task.dueDate, 1));
+    const otherTasksDueInAWeek = this.src.filter(task => !task.hasOwnProperty('dateDone') && task.hasOwnProperty('dueDate') && !dateIsWithinNumDays(task.dueDate, 1) && dateIsWithinNumDays(task.dueDate, 7));
     
-    return [
-      `Tasks you've done today🎉`,
-      tasksDoneToday.map(displayTask).join('\n'),
-      `\nTasks due today❗`,
-      tasksDueToday.map(displayTask).join('\n'),
-      `\nTasks due this week⏳`,
-      otherTasksDueInAWeek.map(displayTask).join('\n'),
-    ].join('\n');
+
+    let lines = [];
+    if(tasksDoneToday.length>0){
+      lines.push("\nTasks you've done today🎉");
+      lines.push(tasksDoneToday.map(displayTask).join('\n'));
+    }
+
+    if(tasksDueToday.length>0){
+      lines.push(`\nTasks due today❗`);
+      lines.push(tasksDueToday.map(displayTask).join('\n'));
+    }
+
+
+    if(otherTasksDueInAWeek.length>0){
+      lines.push(`\nTasks due this week⏳`);
+      lines.push(otherTasksDueInAWeek.map(displayTask).join('\n'));
+    }
+
+    return lines.join('\n');
   }
 }
 
